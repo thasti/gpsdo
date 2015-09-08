@@ -18,6 +18,8 @@
 /* maximum deviation for correct calculation: 2^15 / INTERVAL_SEC = 163Hz @ 20sec */
 #define SETPOINT_COUNT	(F_SETPOINT * INTERVAL_SEC) % 65536
 
+#define FREQ_STRING_LEN	10
+
 /* Port 1 */
 #define CLK_OCXO	BIT2
 #define CLK_PPS		BIT6

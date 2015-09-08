@@ -10,6 +10,8 @@
 #include "gps.h"
 #include "main.h"
 #include "hw.h"
+#include "string.h"
+#include "debug.h"
 
 volatile uint16_t start_count = 0;
 volatile uint16_t end_count = 0;
@@ -28,7 +30,9 @@ void software_delay(void) {
 
 int main(void) {
 	uint16_t diff;
-	int32_t freq_deviation;
+	int16_t freq_deviation;
+	uint32_t freq;
+	char freq_string[FREQ_STRING_LEN + 1];
 
 	WDTCTL = WDTPW + WDTHOLD;
 	hw_init();
@@ -40,7 +44,7 @@ int main(void) {
 		if (meas_finished == 1) {
 			meas_finished = 0;
 			diff = end_count - start_count;
-			freq_deviation = (int32_t) (diff - SETPOINT_COUNT);
+			freq_deviation = (int16_t) (diff - SETPOINT_COUNT);
 			if (freq_deviation < -FDEV_DEADZONE) {
 				PJOUT = LED1;
 			} else if (freq_deviation > FDEV_DEADZONE) {
@@ -48,6 +52,11 @@ int main(void) {
 			} else {
 				PJOUT = LED2;
 			}
+			freq = F_SETPOINT + freq_deviation;
+			i32toa(freq, FREQ_STRING_LEN, freq_string);	
+			freq_string[FREQ_STRING_LEN] = '\n';
+			debug_transmit_string_fixed(freq_string, FREQ_STRING_LEN + 1);
+			
 		}
 		
 	} /* while(1) */
