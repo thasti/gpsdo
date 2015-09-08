@@ -25,11 +25,18 @@ void hw_init(void) {
 	/* GPIO init port 1 */
 	P1OUT = 0;
 	P1DIR = 0;
+	P1SEL1 |= CLK_OCXO + CLK_PPS;
+	P2SEL0 |= CLK_PPS;
+	P1SEL0 &= ~CLK_OCXO;
 
 	/* GPIO init port 2 */
 	P2DIR = TXD_GPS + TXD_DEBUG;				
 	P2SEL1 |= RXD_GPS + TXD_GPS + RXD_DEBUG + TXD_DEBUG;
 	P2SEL0 &= ~(RXD_GPS + TXD_GPS + RXD_DEBUG + TXD_DEBUG);
+
+	/* GPIO init port J */
+	PJDIR = LED1 + LED2 + LED3 + LED4;
+	PJOUT = 0;
 
 	/* USCI_A0 (GPS UART) init */
 	UCA0CTL1 = UCSWRST; 			/* reset USCI */
@@ -47,7 +54,7 @@ void hw_init(void) {
 	UCA1MCTLW = (0x49<<8)+(1<<4)+UCOS16;	/* set UCA0BRS(<<8) and BRF(<<4) */
 	UCA1CTL1 &= ~UCSWRST;			/* release from reset */
 
-	/* TODO enable timer interrupt */
+	/* Timer A Capture/Compare 0 enable */
 	TA0CTL = TASSEL__TACLK + ID__1 + MC__CONTINUOUS;
 	TA0CCTL0 = CM_1 + CCIS_0 + CAP + CCIE;
 
