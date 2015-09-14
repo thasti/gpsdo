@@ -17,22 +17,11 @@ volatile uint16_t start_count = 0;
 volatile uint16_t end_count = 0;
 volatile uint16_t meas_finished = 0;
 
-void software_delay(void) {
-	__delay_cycles(60000);
-	__delay_cycles(60000);
-	__delay_cycles(60000);
-	__delay_cycles(60000);
-	__delay_cycles(60000);
-	__delay_cycles(60000);
-	__delay_cycles(60000);
-	__delay_cycles(60000);
-}
-
 int main(void) {
 	uint16_t diff;
-	int16_t freq_deviation;
-	uint32_t freq;
-	char freq_string[FREQ_STRING_LEN + 1];
+	int16_t count_deviation;
+	uint32_t count;
+	char count_string[COUNT_STRING_LEN + 1];
 
 	WDTCTL = WDTPW + WDTHOLD;
 	hw_init();
@@ -44,21 +33,19 @@ int main(void) {
 		if (meas_finished == 1) {
 			meas_finished = 0;
 			diff = end_count - start_count;
-			freq_deviation = (int16_t) (diff - SETPOINT_COUNT);
-			if (freq_deviation < -FDEV_DEADZONE) {
+			count_deviation = (int16_t) (diff - SETPOINT_COUNT_MOD);
+			if (count_deviation < -FDEV_DEADZONE) {
 				PJOUT = LED1;
-			} else if (freq_deviation > FDEV_DEADZONE) {
+			} else if (count_deviation > FDEV_DEADZONE) {
 				PJOUT = LED3;
 			} else {
 				PJOUT = LED2;
 			}
-			freq = F_SETPOINT + freq_deviation;
-			i32toa(freq, FREQ_STRING_LEN, freq_string);	
-			freq_string[FREQ_STRING_LEN] = '\n';
-			debug_transmit_string_fixed(freq_string, FREQ_STRING_LEN + 1);
-			
+			count = SETPOINT_COUNT + count_deviation;
+			i32toa(count, COUNT_STRING_LEN, count_string);	
+			count_string[COUNT_STRING_LEN] = '\n';
+			debug_transmit_string_fixed(count_string, COUNT_STRING_LEN + 1);
 		}
-		
 	} /* while(1) */
 } /* main() */
 
