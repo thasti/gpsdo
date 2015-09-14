@@ -23,6 +23,8 @@ int main(void) {
 	uint32_t count;
 	char count_string[COUNT_STRING_LEN + 1];
 
+	int16_t c_int = 0;
+
 	WDTCTL = WDTPW + WDTHOLD;
 	hw_init();
 	gps_startup_delay();
@@ -30,6 +32,11 @@ int main(void) {
 	while(!(gps_set_gps_only()));
 	
 	while(1) {
+		if (P1IN & CLK_PPS) {
+			PJOUT |= LED4;
+		} else {
+			PJOUT &= ~LED4;
+		}
 		if (meas_finished == 1) {
 			meas_finished = 0;
 			diff = end_count - start_count;
@@ -42,17 +49,18 @@ int main(void) {
 			} else {
 				PJOUT = LED2;
 			}
+
 			/* output absolute count number to USART */
 			count = SETPOINT_COUNT + count_deviation;
 			i32toa(count, COUNT_STRING_LEN, count_string);	
 			count_string[COUNT_STRING_LEN] = '\n';
 			debug_transmit_string_fixed(count_string, COUNT_STRING_LEN + 1);
-			/* control algorithm, count_deviation contains the control error */
-			// cont_int = cont_int + gain * count_deviation;
-			// cont_prop = gain * count_deviation
-			// output = cont_int + cont_prop
-			// PWM value = output
 
+			/* control algorithm, count_deviation contains the control error */
+			c_int = c_int + count_deviation;
+			// PI control: TA1CCR2 = 32768 - 350 * (count_deviation + 2*c_int);
+			// P  control: TA1CCR2 = 32768 - 350 * count_deviation;
+			// I  control: TA1CCR2 = 32768 - 350 * c_int;
 		}
 	} /* while(1) */
 } /* main() */
