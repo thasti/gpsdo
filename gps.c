@@ -11,8 +11,8 @@ inline void gps_transmit_string(char *cmd, uint8_t length) {
 	uint8_t i;
 
 	for (i = 0; i < length; i++) {
-		while (!(UCA0IFG&UCTXIFG));
-		UCA0TXBUF = cmd[i];
+		while (!(UCA1IFG&UCTXIFG));
+		UCA1TXBUF = cmd[i];
 	}
 }
 
@@ -34,14 +34,14 @@ uint8_t gps_receive_ack(uint8_t class_id, uint8_t msg_id) {
 	nak[6] = class_id;
 	ack[7] = msg_id;
 	nak[7] = msg_id;
-	UCA0IFG &= ~UCRXIFG;
+	UCA1IFG &= ~UCRXIFG;
 
 	/* runs until ACK/NAK packet is received, possibly add a timeout.
 	 * can crash if a message ACK is missed (watchdog resets */
 	while(1) {
-		while(!(UCA0IFG & UCRXIFG));
-		UCA0IFG &= ~UCRXIFG;
-		rx_byte = UCA0RXBUF;
+		while(!(UCA1IFG & UCRXIFG));
+		UCA1IFG &= ~UCRXIFG;
+		rx_byte = UCA1RXBUF;
 		if (rx_byte == ack[match_count] || rx_byte == nak[match_count]) {
 			if (match_count == 3) {	/* test ACK/NAK byte */
 				if (rx_byte == ack[match_count]) {
@@ -75,11 +75,11 @@ uint16_t gps_receive_payload(uint8_t class_id, uint8_t msg_id, unsigned char *pa
 	uint16_t payload_cnt = 0;
 	uint16_t payload_len = 0;
 
-	UCA0IFG &= ~UCRXIFG;
+	UCA1IFG &= ~UCRXIFG;
 	while(1) {
-		while(!(UCA0IFG & UCRXIFG));
-		UCA0IFG &= ~UCRXIFG;
-		rx_byte = UCA0RXBUF;
+		while(!(UCA1IFG & UCRXIFG));
+		UCA1IFG &= ~UCRXIFG;
+		rx_byte = UCA1RXBUF;
 		switch (state) {
 			case UBX_A:
 				if (rx_byte == 0xB5)	state = UBX_B;
