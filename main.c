@@ -34,6 +34,7 @@ int main(void) {
 			meas_finished = 0;
 			diff = end_count - start_count;
 			count_deviation = (int16_t) (diff - SETPOINT_COUNT_MOD);
+			/* visual lock indication */
 			if (count_deviation < -FDEV_DEADZONE) {
 				PJOUT = LED1;
 			} else if (count_deviation > FDEV_DEADZONE) {
@@ -41,10 +42,17 @@ int main(void) {
 			} else {
 				PJOUT = LED2;
 			}
+			/* output absolute count number to USART */
 			count = SETPOINT_COUNT + count_deviation;
 			i32toa(count, COUNT_STRING_LEN, count_string);	
 			count_string[COUNT_STRING_LEN] = '\n';
 			debug_transmit_string_fixed(count_string, COUNT_STRING_LEN + 1);
+			/* control algorithm, count_deviation contains the control error */
+			// cont_int = cont_int + gain * count_deviation;
+			// cont_prop = gain * count_deviation
+			// output = cont_int + cont_prop
+			// PWM value = output
+
 		}
 	} /* while(1) */
 } /* main() */
