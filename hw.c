@@ -33,7 +33,7 @@ void hw_init(void) {
 	P1DIR = VC_PWM;
 	P1SEL1 |= CLK_OCXO + CLK_PPS;
 	P1SEL1 &= ~VC_PWM;
-	P2SEL0 |= CLK_PPS + VC_PWM;
+	P1SEL0 |= CLK_PPS + VC_PWM;
 	P1SEL0 &= ~CLK_OCXO;
 
 	/* GPIO init port 2 */
@@ -65,9 +65,10 @@ void hw_init(void) {
 	TA0CTL = TASSEL__TACLK + ID__1 + MC__CONTINUOUS;
 	TA0CCTL0 = CM_1 + CCIS_0 + CAP + CCIE;
 	
-	TA1CTL = TASSEL__SMCLK + ID__1 + MC__CONTINUOUS;
-	TA1CCR2 = 32767;
-	TA1CCTL2 = OUTMOD_3;
+	TA1CTL = TASSEL__SMCLK + ID__1 + MC__UP;
+	TA1CCR0 = 255;
+	TA1CCR2 = 127;
+	TA1CCTL2 = OUTMOD_7;
 
 	/* Enable Interrupts */
 	__bis_SR_register(GIE);			/* set interrupt enable bit */

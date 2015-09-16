@@ -24,6 +24,7 @@ int main(void) {
 	char count_string[COUNT_STRING_LEN + 1];
 
 	int16_t c_int = 0;
+	int16_t vc = 0;
 
 	WDTCTL = WDTPW + WDTHOLD;
 	hw_init();
@@ -58,9 +59,12 @@ int main(void) {
 
 			/* control algorithm, count_deviation contains the control error */
 			c_int = c_int + count_deviation;
-			// PI control: TA1CCR2 = 32768 - 350 * (count_deviation + 2*c_int);
-			// P  control: TA1CCR2 = 32768 - 350 * count_deviation;
-			// I  control: TA1CCR2 = 32768 - 350 * c_int;
+			if (c_int > 200) c_int = 200;
+			if (c_int < -200) c_int = -200;
+			vc = (32768 - 350 * c_int) >> 8;
+			if (vc > 255) vc = 255;
+			if (vc < 0) vc = 0;
+			TA1CCR2 = vc;
 		}
 	} /* while(1) */
 } /* main() */
