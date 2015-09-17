@@ -22,6 +22,7 @@ int main(void) {
 	int16_t count_deviation;
 	uint32_t count;
 	char count_string[COUNT_STRING_LEN + 1];
+	char pwm_string[3 + 1];
 
 	int16_t c_int = 0;
 	int16_t vc = 0;
@@ -54,7 +55,7 @@ int main(void) {
 			/* output absolute count number to USART */
 			count = SETPOINT_COUNT + count_deviation;
 			i32toa(count, COUNT_STRING_LEN, count_string);	
-			count_string[COUNT_STRING_LEN] = '\n';
+			count_string[COUNT_STRING_LEN] = ' ';
 			debug_transmit_string_fixed(count_string, COUNT_STRING_LEN + 1);
 
 			/* control algorithm, count_deviation contains the control error */
@@ -65,6 +66,12 @@ int main(void) {
 			if (vc > 255) vc = 255;
 			if (vc < 0) vc = 0;
 			TA1CCR2 = vc;
+
+			/* output PWM for debug purposes */
+			i32toa((uint32_t)vc, 3, pwm_string);
+			pwm_string[3] = '\n';
+			debug_transmit_string_fixed(pwm_string, 3 + 1);
+
 		}
 	} /* while(1) */
 } /* main() */
